@@ -1,0 +1,10 @@
+Timestamp,User,Store,Row,Issue,Column,Value,AMZ Order #,Action,Note
+2025-08-28 23:45:36 UTC,anonymous,Albeny Mart Store,130,Purchase exceeds 2× sale,Purchase Price,27.99,249-0481376-0869424,Ignore,
+2025-08-28 23:45:36 UTC,anonymous,Albeny Mart Store,135,Purchase exceeds 2× sale,Purchase Price,31.79,503-9564260-5103045,Ignore,
+2025-08-28 23:45:36 UTC,anonymous,Albeny Mart Store,164,Purchase exceeds 2× sale,Purchase Price,27.99,503-0881495-3191801,Ignore,
+2025-08-28 23:45:36 UTC,anonymous,Albeny Mart Store,455,Invalid units,Units,0.0,250-2184536-0061422,Confirm,
+2025-08-29 00:03:06 UTC,anonymous,Albeny Mart Store,130,Purchase exceeds 2× sale,Purchase Price,27.99,249-0481376-0869424,Ignore,
+2025-08-29 00:03:06 UTC,anonymous,Albeny Mart Store,135,Purchase exceeds 2× sale,Purchase Price,31.79,503-9564260-5103045,Ignore,
+2025-08-29 00:03:06 UTC,anonymous,Albeny Mart Store,164,Purchase exceeds 2× sale,Purchase Price,27.99,503-0881495-3191801,Ignore,
+2025-08-29 00:24:37 UTC,anonymous,Albeny Mart Store,183,Purchase exceeds 2× sale,Purchase Price,16.49,250-8931079-6993413,Ignore,
+2025-08-29 00:24:37 UTC,anonymous,Albeny Mart Store,455,Unassigned hunter,Hunter Name,Unassigned,250-2184536-0061422,Confirm,
