@@ -40,7 +40,6 @@ VALIDATION_LOG_PATH = "validation_log.csv"
 
 # Profit rule: reduce margin by 10% via purchase uplift
 # Profit = 0.85 * Sales − 1.10 * Purchase
-# Profit = 0.85 * Sales − 1.10  Test Edit
 def adjusted_profit(sales, purchase):
     return 0.85 * sales - 1.06 * purchase
 
@@ -793,6 +792,7 @@ with tab_progress:
 
     cur_start, cur_end = _safe_month_bounds(max_date)
     last_start, last_end = _safe_month_bounds(cur_start - pd.Timedelta(days=1))
+    prev2_start, prev2_end = _safe_month_bounds(last_start - pd.Timedelta(days=1))
 
     cur_scope = mine[(mine[DATE_HEADER] >= cur_start) & (mine[DATE_HEADER] <= cur_end)]
     last_scope = mine[(mine[DATE_HEADER] >= last_start) & (mine[DATE_HEADER] <= last_end)]
@@ -816,7 +816,7 @@ with tab_progress:
     fig1 = px.line(daily, x=DATE_HEADER, y=["Profit"], title="Daily Profit")
     st.plotly_chart(fig1, use_container_width=True)
 
-    # Cumulative profit — current vs last month
+    # Cumulative profit — current vs last 2 months
     def cumulative_profit(df: pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp):
         frame = df[(df[DATE_HEADER] >= start) & (df[DATE_HEADER] <= end)].copy()
         g = frame.groupby(DATE_HEADER, as_index=False).agg(
@@ -830,7 +830,9 @@ with tab_progress:
     cur_cum["Period"] = cur_start.strftime("%b %Y")
     last_cum = cumulative_profit(mine, last_start, last_end)
     last_cum["Period"] = last_start.strftime("%b %Y")
-    cum = pd.concat([cur_cum, last_cum], ignore_index=True)
+    prev2_cum = cumulative_profit(mine, prev2_start, prev2_end)
+    prev2_cum["Period"] = prev2_start.strftime("%b %Y")
+    cum = pd.concat([cur_cum, last_cum, prev2_cum], ignore_index=True)
     fig2 = px.line(
         cum, x=DATE_HEADER, y="Cumulative Profit", color="Period", markers=True, title="Cumulative Profit"
     )
@@ -848,12 +850,13 @@ with tab_progress:
     fig3 = px.bar(asin_top, x=ASIN_HEADER, y="Profit", title="Top ASINs (Profit)")
     st.plotly_chart(fig3, use_container_width=True)
 
-    # All hunters (current & last) — Profit only
+    # All hunters (current & last 2 months) — Profit only
     def slice_period(df: pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
         return df[(df[DATE_HEADER] >= start) & (df[DATE_HEADER] <= end)]
 
     cur_agg_all = aggregate_by_hunter_profit_only(slice_period(work, cur_start, cur_end))
     last_agg_all = aggregate_by_hunter_profit_only(slice_period(work, last_start, last_end))
+    prev2_agg_all = aggregate_by_hunter_profit_only(slice_period(work, prev2_start, prev2_end))
 
     fmt = {"Orders": "{:,.0f}", "Profit": "{:,.2f}"}
     st.subheader(f"All Hunters — {cur_start.strftime('%b %Y')}")
@@ -862,18 +865,22 @@ with tab_progress:
     st.subheader(f"All Hunters — {last_start.strftime('%b %Y')}")
     st.dataframe(last_agg_all.style.format(fmt), use_container_width=True)
 
-    # Export two CSVs (profit-only tables)
-    def _zip_reports(a: pd.DataFrame, b: pd.DataFrame) -> bytes:
+    st.subheader(f"All Hunters — {prev2_start.strftime('%b %Y')}")
+    st.dataframe(prev2_agg_all.style.format(fmt), use_container_width=True)
+
+    # Export three CSVs (profit-only tables)
+    def _zip_reports(a: pd.DataFrame, b: pd.DataFrame, c: pd.DataFrame) -> bytes:
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, mode="w", compression=zipfile.ZIP_DEFLATED) as z:
             z.writestr(f"profit_{cur_start.strftime('%b_%Y').lower()}.csv", a.to_csv(index=False))
             z.writestr(f"profit_{last_start.strftime('%b_%Y').lower()}.csv", b.to_csv(index=False))
+            z.writestr(f"profit_{prev2_start.strftime('%b_%Y').lower()}.csv", c.to_csv(index=False))
         buf.seek(0)
         return buf.getvalue()
 
     st.download_button(
         "Download Reports (ZIP)",
-        data=_zip_reports(cur_agg_all, last_agg_all),
+        data=_zip_reports(cur_agg_all, last_agg_all, prev2_agg_all),
         file_name="staff_profit_reports.zip",
         mime="application/zip",
         use_container_width=True,
