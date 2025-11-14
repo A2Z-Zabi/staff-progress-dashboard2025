@@ -40,6 +40,7 @@ VALIDATION_LOG_PATH = "validation_log.csv"
 
 # Profit rule: reduce margin by 10% via purchase uplift
 # Profit = 0.85 * Sales − 1.10 * Purchase
+# Profit = 0.85 * Sales − 1.10  Test Edit
 def adjusted_profit(sales, purchase):
     return 0.85 * sales - 1.06 * purchase
 
